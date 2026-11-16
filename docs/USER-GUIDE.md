@@ -6,6 +6,20 @@ phone, and fixing the common problems. It takes about 15 minutes, once.
 **What you need:** a Google TV, Android TV or Fire TV (not Samsung, LG, Roku or Apple TV), a phone on
 the same Wi-Fi, and a computer for two minutes to copy your ESPN login if your league is private.
 
+> **The easiest way to install it: let Claude Code do it for you.** Honestly, this is the way we recommend
+> for everyone. On a computer on the same Wi-Fi as your TV:
+> 1. Install [Claude Code](https://claude.com/claude-code) (it needs a paid Claude plan).
+> 2. Download this repo (the green **Code** button, then **Download ZIP**, and unzip it), and open the
+>    `fantasybug` folder in Claude Code.
+> 3. Say: **"Install fantasybug on my TV."**
+>
+> It finds your TV, tells you what it will do before it touches anything, installs fantasybug, and takes
+> care of the fiddly "display over other apps" step (which a Fire TV can't do without a computer). You only
+> press a few buttons on the TV remote, then set up your league on your phone. Stuck at any point, with any
+> method? Do the same and tell Claude Code where you got stuck.
+
+The rest of this guide is the do-it-yourself way.
+
 ## 1. Install the app
 
 1. On the TV, install **Downloader** (by AFTVnews) from the Play Store or the Amazon Appstore.
@@ -166,12 +180,14 @@ the cause hasn't been found. A TCL Google TV running the same overlay is fine fo
 
 ## Allowing it from a computer
 
-Only needed if your TV has no "Display over other apps" page. You do this once.
+Needed on a **Fire TV** (it has no "Display over other apps" page), and on any other TV without one. You do
+this once. **The easy way: Claude Code** (top of this guide) does all of the following for you. By hand:
 
 1. On the TV, switch on **Developer options**: Settings, System (or Device Preferences), About, then press
    OK on **Build** seven times. On Fire TV: Settings, My Fire TV, About, press OK on the device name seven
    times.
-2. In **Developer options**, switch on **USB debugging** (and **Network debugging** if there is one).
+2. In **Developer options**, switch on **USB debugging** (on a Fire TV it's called **ADB debugging**), and
+   **Network debugging** if there is one.
 3. On the computer, install Google's free
    [platform-tools](https://developer.android.com/tools/releases/platform-tools). Find the TV's address in
    its network settings.

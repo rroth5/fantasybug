@@ -9,7 +9,19 @@ stream shows the play, not a minute early. A page on your phone runs it all.
 
 <a href="docs/media/fantasybug-preview.mp4"><img src="docs/media/preview.gif" width="270" alt="fantasybug in 22 seconds (tap for the video with sound)"></a>
 
-**New here? The [user guide](docs/USER-GUIDE.md) walks you through it in about 15 minutes.**
+> **The easiest way to install it: let Claude Code do it for you.** Honestly, this is the way we recommend
+> for everyone. On a computer on the same Wi-Fi as your TV:
+> 1. Install [Claude Code](https://claude.com/claude-code) (it needs a paid Claude plan).
+> 2. Download this repo (the green **Code** button, then **Download ZIP**, and unzip it), and open the
+>    `fantasybug` folder in Claude Code.
+> 3. Say: **"Install fantasybug on my TV."**
+>
+> It finds your TV, tells you what it will do before it touches anything, installs fantasybug, and takes
+> care of the fiddly "display over other apps" step (which a Fire TV can't do without a computer). You only
+> press a few buttons on the TV remote, then set up your league on your phone. Stuck at any point, with any
+> method? Do the same and tell Claude Code where you got stuck.
+
+Prefer doing it yourself? The [user guide](docs/USER-GUIDE.md) walks you through it in about 15 minutes.
 
 > **Not affiliated with ESPN or the NFL.** fantasybug is an independent, unofficial project. ESPN and
 > ESPN Fantasy are trademarks of ESPN, Inc. NFL is a trademark of the National Football League. It reads
@@ -49,10 +61,12 @@ picture quality and tap-to-sync. No apps to install on the phone, and no TV remo
 |---|---|
 | Google TV (Chromecast with Google TV, Google TV Streamer, Sony, TCL, Hisense and others) | Samsung (Tizen) |
 | Android TV (Nvidia Shield, Xiaomi, Philips Android TV and others) | LG (webOS) |
-| Amazon Fire TV on Fire OS (Fire TV Stick 4K and newer, Cube) | Roku |
+| Amazon Fire TV on Fire OS (Fire TV Stick 4K and newer, Cube): needs a computer once (see below) | Roku |
 | | Apple TV |
 
-It needs Android 6 or newer and the TV's permission to "display over other apps".
+It needs Android 6 or newer and the TV's permission to "display over other apps". Google TVs have a page
+for that in their settings. **Fire TVs don't**, so on a Fire TV it's allowed once from a computer: easiest
+with Claude Code (above), or by hand (below).
 
 **Fire TV sticks: not confirmed yet.** On one low-memory Fire TV (model AFTDCT31), an earlier build of
 this overlay inside couch-tv made the stick slow down after it went idle, and the cause hasn't been found
@@ -62,22 +76,23 @@ and if you can, check it with a computer before relying on it:
 `adb shell dumpsys meminfo dev.fantasybug | grep Proxy` (a number that keeps climbing is the problem;
 please [open an issue](../../issues) with what you see).
 
-## Install
+## Install it yourself
 
 1. On the TV, install the free **Downloader** app (by AFTVnews) from the Play Store or Amazon Appstore.
 2. In Downloader, type the code **`6503818`** and press Go, then **Install**.
-   (Or the full address: `https://github.com/RRoth5/fantasybug/releases/latest/download/fantasybug.apk`.
+   (Or the full address: `https://github.com/rroth5/fantasybug/releases/latest/download/fantasybug.apk`.
    With a computer, `adb install fantasybug.apk` works too.)
 3. Open **fantasybug** from the TV's apps.
 
 ### Allow "Display over other apps"
 
 fantasybug draws on top of other apps, so the TV has to allow it once. On the fantasybug screen, choose
-**Allow "Display over other apps"**. If your TV opens a settings page, switch fantasybug on there.
+**Allow "Display over other apps"**. On a Google TV a settings page opens: switch fantasybug on there.
 
-Many Google TVs and Fire TVs have no such page. Then it is allowed once from a computer on the same
-Wi-Fi, with Google's free [platform-tools](https://developer.android.com/tools/releases/platform-tools)
-(switch on Developer options and USB debugging on the TV first):
+A **Fire TV** has no such page. Then it is allowed once from a computer on the same Wi-Fi: easiest with
+Claude Code (top of this page), or by hand with Google's free
+[platform-tools](https://developer.android.com/tools/releases/platform-tools) (switch on Developer options
+and ADB debugging on the TV first):
 
 ```sh
 adb connect <your TV's address>

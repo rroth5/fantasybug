@@ -219,7 +219,7 @@ class MainActivity : Activity() {
         }.start()
     }
 
-    /** The TV's own "Display over other apps" page. Many Google TVs have none: then say how to allow it. */
+    /** The TV's own "Display over other apps" page. Fire TV has none: then say how to allow it from a computer. */
     private fun askOverlay() {
         val tries = listOf(
             Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")),
@@ -228,9 +228,11 @@ class MainActivity : Activity() {
         for (i in tries) {
             try { startActivity(i); return } catch (e: Exception) {}
         }
-        AlertDialog.Builder(this).setTitle("Display over other apps")
-            .setMessage("This TV has no page for it in Settings, so it has to be allowed once from a computer " +
-                "(the fantasybug guide shows how, in two commands):\n\nadb shell appops set $packageName SYSTEM_ALERT_WINDOW allow")
+        AlertDialog.Builder(this).setTitle("One step from a computer")
+            .setMessage("This TV (Fire TV, and some others) has no setting for showing apps over other apps, so it has to be " +
+                "allowed once from a computer on the same Wi-Fi.\n\nThe easy way: open fantasybug in Claude Code on your " +
+                "computer and say \"allow fantasybug on my TV\". It does it for you.\n\n" +
+                "Or by hand: the fantasybug guide on GitHub, \"Allowing it from a computer\".")
             .setPositiveButton("OK", null).show()
     }
 
