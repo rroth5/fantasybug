@@ -81,6 +81,6 @@ Make that number once (you do this yourself; the site has a captcha, and what yo
 2. Paste this address (GitHub's "newest release" link, so the code never needs changing):
    `https://github.com/RRoth5/fantasybug/releases/latest/download/fantasybug.apk`
 3. Submit. You get a number, for example 12345.
-4. Put that number in place of `DOWNLOADER-CODE` in `README.md` and `docs/USER-GUIDE.md`, commit and push.
+4. Put that number in `README.md` and `docs/USER-GUIDE.md` (fantasybug's own code is **6503818**), commit and push.
 
 It only works once the repo is public and has a release: a private repo's files need a GitHub login.

@@ -9,7 +9,7 @@ the same Wi-Fi, and a computer for two minutes to copy your ESPN login if your l
 ## 1. Install the app
 
 1. On the TV, install **Downloader** (by AFTVnews) from the Play Store or the Amazon Appstore.
-2. In Downloader, type the code **`DOWNLOADER-CODE`** and press **Go**. Choose **Install** when the TV asks.
+2. In Downloader, type the code **`6503818`** and press **Go**. Choose **Install** when the TV asks.
    (Or type the full address: `https://github.com/RRoth5/fantasybug/releases/latest/download/fantasybug.apk`.)
    (A Google TV asks you to let Downloader install apps: say yes.)
 

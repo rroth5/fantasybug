@@ -66,7 +66,7 @@ please [open an issue](../../issues) with what you see).
 ## Install
 
 1. On the TV, install the free **Downloader** app (by AFTVnews) from the Play Store or Amazon Appstore.
-2. In Downloader, type the code **`DOWNLOADER-CODE`** and press Go, then **Install**.
+2. In Downloader, type the code **`6503818`** and press Go, then **Install**.
    (Or the full address: `https://github.com/RRoth5/fantasybug/releases/latest/download/fantasybug.apk`.
    With a computer, `adb install fantasybug.apk` works too.)
 3. Open **fantasybug** from the TV's apps.
