@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="fantasybug" id="apptitle">
+<meta name="theme-color" content="#0c0c10">
+<title>fantasybug remote</title>
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<!-- The phone remote, served by the TV (RemoteService.kt) while the phone remote is on, with the key from
+     its QR code: the views (for TVs whose remote can't be given a button), the look, image quality, the
+     lineup, and tap-to-sync: tap the big button the moment a play happens on screen; the TV matches it to the
+     nearest popup and sets that game's delay. ?demo=1 runs it without a TV, for previewing. -->
+<style>
+  :root { --bg: #0c0c10; --card: #17171d; --line: rgba(255,255,255,0.1); --text: #fff; --dim: rgba(255,255,255,0.6); --mine: #3fd07a; --warn: #ffb547; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+  main { max-width: 32rem; margin: 0 auto; padding: max(1rem, env(safe-area-inset-top)) 1rem calc(1.5rem + env(safe-area-inset-bottom)); }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin: 0.25rem 0 0.75rem; }
+  h1 { font-size: 1.25rem; margin: 0; }
+  h1 small { display: block; font-size: 0.875rem; font-weight: 600; color: var(--mine); margin-top: 0.125rem; }
+  h1 small:empty { display: none; }
+  /* this TV's name: each TV has its own remote page (and home-screen icon), delays and look */
+  .house { display: flex; gap: 0.375rem; margin: 0 0 0.75rem; overflow-x: auto; }
+  .house button { flex: none; padding: 0.4375rem 0.875rem; border-radius: 1rem; border: 1px solid var(--line); background: transparent; color: var(--text);
+    font: inherit; font-size: 0.875rem; font-weight: 600; touch-action: manipulation; }
+  .house button.on { background: var(--mine); border-color: var(--mine); color: #06130b; }
+  .house button.add { color: var(--dim); border-style: dashed; }
+  .panel { display: none; margin: 0 0 1rem; padding: 0.875rem; border-radius: 1rem; background: var(--card); }
+  .panel.on { display: block; }
+  .panel h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+  .panel p { margin: 0.25rem 0 0.625rem; color: var(--dim); font-size: 0.9375rem; }
+  .panel .row { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem; }
+  .panel input { flex: 1; min-width: 0; padding: 0.625rem 0.75rem; border-radius: 0.75rem; border: 1px solid var(--line); background: #0f0f14; color: var(--text); font: inherit; }
+  .panel .err { color: var(--warn); }
+  .support { display: none; margin-top: 1.5rem; padding: 1rem; border-radius: 1rem; background: var(--card); text-align: center; }
+  .support.on { display: block; }
+  .support p { margin: 0 0 0.75rem; color: var(--dim); font-size: 0.9375rem; }
+  .support a { display: inline-block; padding: 0.75rem 1.25rem; border-radius: 0.875rem; background: var(--mine); color: #06130b; font-weight: 700; text-decoration: none; }
+  .logo { width: 1.75rem; height: 1.75rem; border-radius: 0.375rem; vertical-align: -0.375rem; margin-right: 0.375rem; }
+  .rename { border: 0; background: none; padding: 0; color: var(--dim); font: inherit; font-size: 0.8125rem; text-decoration: underline; }
+  /* the matchup as the TV has it, or why it has nothing */
+  .espn { display: none; margin: -0.25rem 0 0.75rem; font-size: 0.9375rem; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .espn.on { display: block; }
+  .espn b { color: var(--text); } .espn b.mine { color: var(--mine); }
+  .espn.bad { color: var(--warn); }
+  .conn { display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; color: var(--dim); white-space: nowrap; }
+  .conn::before { content: ""; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--dim); }
+  .conn.ok::before { background: var(--mine); } .conn.bad { color: var(--warn); } .conn.bad::before { background: var(--warn); }
+  .views { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.375rem; padding: 0.25rem; border-radius: 1rem; background: var(--card); }
+  .views button { border: 0; border-radius: 0.75rem; padding: 0.875rem 0.25rem; background: transparent; color: var(--dim);
+    font-family: inherit; font-size: 0.9375rem; font-weight: 650; touch-action: manipulation; }
+  .views button.on { background: var(--mine); color: #06130b; }
+  .views button[data-v="off"].on { background: rgba(255,255,255,0.16); color: var(--text); }
+  .views button.wait { opacity: 0.5; }
+  .views.two { grid-template-columns: 1fr 1fr; }
+  .views.three { grid-template-columns: repeat(3, 1fr); }
+  /* where the lineup sits: either side, top, middle or bottom; a tall block, like the widget */
+  .screen.lwpos { grid-template-rows: repeat(3, 1fr); }
+  .screen.lwpos button { padding: 0.375rem 0.625rem; }
+  .screen.lwpos button::after { width: 1.5rem; height: 100%; border-radius: 0.375rem; }
+  .screen.lwpos button[data-p^="m"] { align-items: center; }
+  .lwhide .lwpos { display: none; }
+  .lookoff #lws, .lookoff .lwpos, .lookoff #quality { opacity: 0.4; pointer-events: none; }
+  .sub.small { margin: 0.5rem 0 0; font-size: 0.8125rem; }
+  /* where the pill sits: a little TV, tap a corner or an edge */
+  .screen { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; margin-top: 0.5rem;
+    aspect-ratio: 16 / 9; border-radius: 0.875rem; border: 0.1875rem solid #2a2a31; background: linear-gradient(#24452c, #1b3322); overflow: hidden; }
+  .screen button { border: 0; background: transparent; display: flex; padding: 0.625rem; touch-action: manipulation; }
+  .screen button::after { content: ""; width: 3.25rem; height: 1rem; border-radius: 0.5rem; background: rgba(255,255,255,0.18); }
+  .screen button.on::after { background: var(--mine); box-shadow: 0 0 0.75rem rgba(63,208,122,0.6); }
+  .screen button[data-p$="l"] { justify-content: flex-start; } .screen button[data-p$="c"] { justify-content: center; } .screen button[data-p$="r"] { justify-content: flex-end; }
+  .screen button[data-p^="t"] { align-items: flex-start; } .screen button[data-p^="b"] { align-items: flex-end; }
+  .notchpic { display: none; margin-top: 0.5rem; aspect-ratio: 16 / 9; border-radius: 0.875rem; border: 0.1875rem solid #2a2a31; background: linear-gradient(#24452c, #1b3322); }
+  .notchpic { position: relative; touch-action: none; cursor: ew-resize; }
+  .notchpic i { position: absolute; top: 0; width: 34%; height: 13%; border-radius: 0 0 0.75rem 0.75rem; background: #000;
+    left: calc(4% + 92% * var(--nx, 50) / 100); transform: translateX(calc(var(--nx, 50) * -1%)); }
+  .slider { display: none; width: 100%; margin: 0.75rem 0 0; accent-color: var(--mine); }
+  .notch #pos { display: none; } .notch .notchpic, .notch .slider { display: block; }
+  .hint { display: none; margin: 0.5rem 0 0; color: var(--dim); font-size: 0.875rem; }
+  .lookoff .hint { display: block; }
+  .lookoff .screen, .lookoff .notchpic, .lookoff .slider, .lookoff #looks { opacity: 0.4; pointer-events: none; }
+  #tap:disabled { background: #2a2a31; color: var(--dim); box-shadow: none; }
+  .sub { color: var(--dim); font-size: 0.9375rem; margin: 0 0 1rem; }
+  #tap { display: block; width: 100%; aspect-ratio: 1.4; border: 0; border-radius: 1.5rem; background: var(--mine); color: #06130b;
+    font-family: inherit; font-size: 1.75rem; font-weight: 800; line-height: 1.2; letter-spacing: 0.01em; touch-action: manipulation; user-select: none; -webkit-user-select: none;
+    box-shadow: 0 0.75rem 2rem rgba(63,208,122,0.25); transition: transform 90ms ease; }
+  #tap small { display: block; font-size: 1rem; font-weight: 600; opacity: 0.7; margin: 0.375rem 1rem 0; }
+  #tap .pre { margin: 0 0 0.5rem; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.8125rem; }
+  #tap .play { display: block; padding: 0 1.25rem; font-size: 1.5rem; }
+  .link { display: none; width: 100%; margin: 0.625rem 0 0; padding: 0.625rem; border: 1px dashed var(--line); border-radius: 0.875rem; background: transparent; color: var(--dim); font-family: inherit; font-size: 0.9375rem; }
+  .link.on { display: block; }
+  #tap:active, #tap.hit { transform: scale(0.97); }
+  #result { min-height: 4.5rem; margin: 0.875rem 0 0; padding: 0.75rem 0.875rem; border-radius: 1rem; background: var(--card); color: var(--dim); }
+  #result b { color: var(--text); }
+  #result .row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+  #result.bad { color: var(--warn); }
+  #result h3 { margin: 0 0 0.5rem; font-size: 1rem; color: var(--text); }
+  .pick { display: block; width: 100%; text-align: left; margin: 0.375rem 0 0; padding: 0.625rem 0.75rem; border: 1px solid var(--line); border-radius: 0.75rem;
+    background: rgba(255,255,255,0.04); color: var(--text); font-family: inherit; font-size: 0.9375rem; line-height: 1.3; }
+  .pick span { display: block; font-size: 0.8125rem; color: var(--dim); margin-top: 0.125rem; }
+  button.small { flex: none; border: 1px solid var(--line); background: transparent; color: var(--text); border-radius: 0.75rem; padding: 0.5rem 0.875rem; font-family: inherit; font-size: 0.9375rem; font-weight: 600; }
+  h2 { font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); margin: 1.5rem 0 0.375rem; }
+  .list { border-radius: 1rem; background: var(--card); overflow: hidden; }
+  .item { display: flex; align-items: center; gap: 0.625rem; padding: 0.75rem 0.875rem; border-top: 1px solid var(--line); }
+  .item:first-child { border-top: 0; }
+  .item .name { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .name span { display: block; font-weight: 400; font-size: 0.8125rem; color: var(--dim); }
+  .item .d { flex: none; min-width: 3.25rem; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .item .d.synced { color: var(--mine); }
+  .empty { padding: 0.875rem; color: var(--dim); }
+  .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; color: var(--dim); font-size: 0.875rem; }
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><h1><img class="logo" src="icon.svg" alt="">fantasybug<small id="tvname"></small></h1><span class="conn" id="conn">Connecting…</span></div>
+  <nav class="house" id="house" aria-label="Your TVs"></nav>
+  <div class="panel" id="addtv">
+    <h3>Add a TV</h3>
+    <p>Open fantasybug once on the other TV, on the same Wi-Fi. Then pick it here.</p>
+    <div id="found"></div>
+    <div class="row"><input id="addr" placeholder="or its address, like 192.168.x.x:8780" inputmode="url" autocapitalize="off"><button class="small" id="addgo" type="button">Add</button></div>
+    <div id="codebox" hidden>
+      <p>The other TV now shows a 4-digit code. Type it here:</p>
+      <div class="row"><input id="code" inputmode="numeric" maxlength="4" placeholder="1234"><button class="small" id="codego" type="button">Link</button></div>
+    </div>
+    <p class="err" id="adderr"></p>
+    <div class="row"><button class="small" id="addclose" type="button">Done</button></div>
+  </div>
+  <div class="espn" id="espn"></div>
+  <div class="views" id="views">
+    <button type="button" data-v="bug">Scorebug</button>
+    <button type="button" data-v="box">Box score</button>
+    <button type="button" data-v="league">League</button>
+    <button type="button" data-v="off">Off</button>
+  </div>
+
+  <h2>Look</h2>
+  <div class="views two" id="looks">
+    <button type="button" data-l="pill">Pill</button>
+    <button type="button" data-l="notch">Notch</button>
+  </div>
+  <div class="screen" id="pos" aria-label="Where the scorebug sits">
+    <button type="button" data-p="tl" aria-label="Top left"></button><button type="button" data-p="tc" aria-label="Top centre"></button><button type="button" data-p="tr" aria-label="Top right"></button>
+    <button type="button" data-p="bl" aria-label="Bottom left"></button><button type="button" data-p="bc" aria-label="Bottom centre"></button><button type="button" data-p="br" aria-label="Bottom right"></button>
+  </div>
+  <div class="notchpic" id="notchpic" aria-label="Where the notch sits along the top"><i id="notchdot"></i></div>
+  <input class="slider" id="nx" type="range" min="0" max="100" step="1" value="50" aria-label="Notch position, left to right">
+  <p class="hint" id="lookhint">Turn the overlay on to change the look.</p>
+
+  <h2>Image quality</h2>
+  <div class="views three" id="quality">
+    <button type="button" data-q="low">Low</button>
+    <button type="button" data-q="med">Medium</button>
+    <button type="button" data-q="high">High</button>
+  </div>
+  <p class="sub small">Lower for a slower TV or streaming stick, higher for a sharper picture on a powerful one.</p>
+
+  <h2>My lineup</h2>
+  <div class="views three" id="lws">
+    <button type="button" data-w="off">Hidden</button>
+    <button type="button" data-w="me">Mine</button>
+    <button type="button" data-w="both">+ Opponent</button>
+  </div>
+  <div class="screen lwpos" id="lwpos" aria-label="Where the lineup sits">
+    <button type="button" data-p="tl" aria-label="Top left"></button><span></span><button type="button" data-p="tr" aria-label="Top right"></button>
+    <button type="button" data-p="ml" aria-label="Middle left"></button><span></span><button type="button" data-p="mr" aria-label="Middle right"></button>
+    <button type="button" data-p="bl" aria-label="Bottom left"></button><span></span><button type="button" data-p="br" aria-label="Bottom right"></button>
+  </div>
+
+  <h2>Sync the popups</h2>
+  <p class="sub">Tap the moment the play happens on TV. That game's popups move to match.</p>
+  <button id="tap" type="button"></button>
+  <button id="other" class="link" type="button">Saw a different play? Tap here when any play happens</button>
+  <div id="result">Waiting for your tap.</div>
+
+  <h2>Games</h2>
+  <div class="list" id="games"><div class="empty">No live games with your players yet.</div></div>
+
+  <h2>Recent popups</h2>
+  <div class="list" id="recent"><div class="empty">None yet.</div></div>
+
+  <div class="foot"><span id="def"></span><button class="small" id="reset" type="button">Reset all</button></div>
+  <div class="support" id="support">
+    <p>Like the app? It's free.</p>
+    <a id="supportlink" target="_blank" rel="noopener noreferrer">Help me pay my league dues</a>
+  </div>
+  <div class="foot"><span>More than one TV? Name each one, then link them with + Add a TV at the top.</span><button class="rename" id="rename" type="button">Name this TV</button></div>
+</main>
+<script>
+(function () {
+  "use strict";
+  var demo = /[?&]demo=1/.test(location.search), $ = function (id) { return document.getElementById(id); };
+  var KEY = (/[?&]k=([a-z0-9]+)/.exec(location.search) || [])[1] || "", expired = false;
+  var house = [], homeId = null, cur = null;   // the TVs, this page's own TV, the one picked (null: this page's own)
+  try { cur = JSON.parse(localStorage.getItem("fantasybug-tv") || "null"); } catch (e) {}
+
+  // ?demo=1: a pretend TV, so the page can be looked at in a browser
+  var fake = { quality: "med", espn: { ok: true }, score: { me: "4TH", them: "MNM", a: 83.2, b: 50.1 }, tv: "Family room", support: "https://ko-fi.com/", house: [{ id: "a1", name: "Family room", url: "#", key: "demo", here: true }], can_draw: true, ready: true, view: "bug", look: { look: "pill", pos: "tr", nx: 50 }, lineup: { on: false, pos: "ml", both: false }, def: 58, canUndo: false, target: { id: 7, play: "Josh Allen's 5 yd pass to D. Knox", game: "BUF @ NYJ" }, games: [{ gid: "1", name: "BUF @ NYJ", delay: 58, synced: false }, { gid: "2", name: "JAX @ TEN", delay: 58, synced: false }],
+    recent: [{ play: "Josh Allen's 5 yd pass to D. Knox", game: "BUF @ NYJ", ago: 12 }, { play: "Parker Washington's 2 yd TD catch from Trevor Lawrence", game: "JAX @ TEN", ago: 95 }] };
+  function api(method, path, body) {
+    if (demo) {
+      if (path === "/api/tap" && !body) {
+        fake.pick = [{ id: "p:1:9", play: "J.Allen pass short right to D.Knox to BUF 44 for 7 yards", game: "BUF @ NYJ", before: 31 },
+                     { id: "p:2:4", play: "T.Lawrence pass short middle to P.Washington for 2 yards, TOUCHDOWN", game: "JAX @ TEN", before: 52 },
+                     { id: "p:1:8", play: "J.Cook up the middle to NYJ 44 for 4 yards", game: "BUF @ NYJ", before: 70 }];
+        return Promise.resolve({ ok: true, pick: true });
+      }
+      if (path === "/api/tap" || path === "/api/choose") {
+        fake.pick = null;
+        fake.canUndo = true; fake.games[0].delay = 30; fake.games[0].synced = true;
+        return Promise.resolve({ ok: true, play: "Josh Allen's 5 yd pass to D. Knox", game: "BUF @ NYJ", before: 58, after: 30, early: true });
+      }
+      if (path === "/api/nudge") fake.games.forEach(function (g) { if (g.gid === body.gid) { g.delay += body.s; g.synced = true; } });
+      if (path === "/api/undo") { fake.canUndo = false; fake.games[0].delay = 58; fake.games[0].synced = false; }
+      if (path === "/api/view") fake.view = body.mode;
+      if (path === "/api/name") { fake.tv = body.name; fake.house[0].name = body.name; }
+      if (path === "/api/find") return Promise.resolve({ tvs: [{ id: "b2", name: "Bedroom", addr: "192.168.x.x:8780" }] });
+      if (path === "/api/link" && !body.code) return Promise.resolve({ ok: true });
+      if (path === "/api/link" && !fake.house.some(function (t) { return t.id === "b2"; })) fake.house.push({ id: "b2", name: "Bedroom", url: "#", key: "demo", here: false });
+      if (path === "/api/quality") { fake.quality = body.q; return Promise.resolve({ ok: true, quality: body.q }); }
+      if (path === "/api/lineup") { Object.assign(fake.lineup, body); return Promise.resolve(JSON.parse(JSON.stringify(fake.lineup))); }
+      if (path === "/api/look") { fake.look = { look: body.look, pos: body.pos, nx: body.nx }; return Promise.resolve(fake.look); }
+      if (path === "/api/reset") fake.games.forEach(function (g) { g.delay = 58; g.synced = false; });
+      return Promise.resolve(JSON.parse(JSON.stringify(fake)));
+    }
+    // the TV's own server, with this phone remote's key (from the QR code, kept in this page's address)
+    // the TV picked in the switcher: its own address and key (this page's own TV when none is picked)
+    return fetch((cur ? cur.url : "") + path.slice(1), { method: method, cache: "no-store", headers: { "X-Key": cur ? cur.key : KEY, "Content-Type": "application/json" },
+        body: method === "POST" ? JSON.stringify(body || {}) : undefined })
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (d) {
+          if (r.status === 403) { expired = true; throw new Error(d.error); }
+          return r.ok ? d : { ok: false, msg: d.error };
+        });
+      });
+  }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function ago(s) { return s < 60 ? s + " s ago" : Math.round(s / 60) + " min ago"; }
+
+  // the button names the next popup's play when it's known in time; otherwise any play, then pick which
+  var target = null;
+  function setButton(t) {
+    var b = $("tap"), key = t ? t.id : 0;
+    if (b.dataset.key === String(key)) return;
+    b.dataset.key = key; target = t; b.textContent = "";
+    if (t) {
+      b.appendChild(el("small", "pre", "Tap when you see"));
+      b.appendChild(el("span", "play", t.play));
+      b.appendChild(el("small", null, t.game));
+    } else {
+      b.appendChild(el("span", "play", "Tap when a play happens"));
+      b.appendChild(el("small", null, "then pick which play it was"));
+    }
+    $("other").classList.toggle("on", !!t);
+  }
+  // the view buttons: the one the overlay is in lit; turning it on or switching waits for the TV's answer
+  var view = null;
+  function setView(v) {
+    var wasOff = view === "off";
+    view = v;
+    Array.prototype.forEach.call(document.querySelectorAll("#views button"), function (b) {
+      b.classList.toggle("on", b.dataset.v === v);
+      b.classList.remove("wait");
+    });
+    var off = v === "off";
+    $("tap").disabled = off;
+    $("other").style.visibility = off ? "hidden" : "";
+    if (off) { $("result").className = ""; $("result").textContent = "The overlay is off. Turn it on above to sync."; shownResult = false; }
+    else if (wasOff) $("result").textContent = "Waiting for your tap.";
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("#views button"), function (b) {
+    b.addEventListener("click", function () {
+      b.classList.add("wait");
+      api("POST", "/api/view", { mode: b.dataset.v }).then(function (r) {
+        if (r && r.ok) setView(r.view);
+        setTimeout(refresh, b.dataset.v === "off" || view === "off" ? 1500 : 300);   // a fresh page needs a moment
+      }, function () { b.classList.remove("wait"); });
+    });
+  });
+  // the look: pill (with where it sits) or notch; only while the overlay is on, since the TV page keeps it
+  var look = { look: "pill", pos: "tr", nx: 50 }, dragging = false;
+  function showNx(nx) { $("notchpic").style.setProperty("--nx", nx); if (!dragging) $("nx").value = nx; }
+  function setLook(l) {
+    if (!l || !l.look) return;
+    look = l;
+    if (typeof l.nx === "number" && !dragging) showNx(l.nx);
+    document.body.classList.toggle("notch", l.look === "notch");
+    Array.prototype.forEach.call(document.querySelectorAll("#looks button"), function (b) { b.classList.toggle("on", b.dataset.l === l.look); });
+    Array.prototype.forEach.call(document.querySelectorAll("#pos button"), function (b) { b.classList.toggle("on", b.dataset.p === l.pos); });
+  }
+  function sendLook(l) { setLook(l); api("POST", "/api/look", l).then(setLook); }
+  // dragging the notch (on the little TV, or the slider): it moves on the TV as you go, a few times a second
+  var sendTimer = null;
+  function moveNotch(nx, now) {
+    nx = Math.max(0, Math.min(100, Math.round(nx)));
+    look = { look: "notch", pos: look.pos, nx: nx };
+    showNx(nx);
+    clearTimeout(sendTimer);
+    if (now) api("POST", "/api/look", look).then(setLook);
+    else sendTimer = setTimeout(function () { api("POST", "/api/look", look); }, 150);
+  }
+  function nxAt(ev) {
+    var r = $("notchpic").getBoundingClientRect(), w = r.width * 0.34;
+    return (ev.clientX - r.left - w / 2) / (r.width - w) * 100;
+  }
+  $("notchpic").addEventListener("pointerdown", function (ev) { dragging = true; $("notchpic").setPointerCapture(ev.pointerId); moveNotch(nxAt(ev)); });
+  $("notchpic").addEventListener("pointermove", function (ev) { if (dragging) moveNotch(nxAt(ev)); });
+  $("notchpic").addEventListener("pointerup", function (ev) { dragging = false; moveNotch(nxAt(ev), true); });
+  $("nx").addEventListener("input", function () { dragging = true; moveNotch(+$("nx").value); });
+  $("nx").addEventListener("change", function () { dragging = false; moveNotch(+$("nx").value, true); });
+  Array.prototype.forEach.call(document.querySelectorAll("#looks button"), function (b) {
+    b.addEventListener("click", function () { sendLook({ look: b.dataset.l, pos: look.pos, nx: look.nx }); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("#pos button"), function (b) {
+    b.addEventListener("click", function () { sendLook({ look: "pill", pos: b.dataset.p, nx: look.nx }); });
+  });
+  // the lineup widget: hidden, yours, or yours and your opponent's; and which side and height of the screen
+  var lineup = { on: false, pos: "ml", both: false };
+  function setLineup(l) {
+    if (!l || typeof l.on !== "boolean") return;
+    lineup = l;
+    var mode = !l.on ? "off" : l.both ? "both" : "me";
+    Array.prototype.forEach.call(document.querySelectorAll("#lws button"), function (b) { b.classList.toggle("on", b.dataset.w === mode); });
+    Array.prototype.forEach.call(document.querySelectorAll("#lwpos button"), function (b) { b.classList.toggle("on", b.dataset.p === l.pos); });
+    document.body.classList.toggle("lwhide", !l.on);
+  }
+  function sendLineup(change) { var l = Object.assign({}, lineup, change); setLineup(l); api("POST", "/api/lineup", change).then(setLineup); }
+  Array.prototype.forEach.call(document.querySelectorAll("#lws button"), function (b) {
+    b.addEventListener("click", function () { sendLineup({ on: b.dataset.w !== "off", both: b.dataset.w === "both" }); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("#lwpos button"), function (b) {
+    b.addEventListener("click", function () { sendLineup({ pos: b.dataset.p }); });
+  });
+  // which TV this is, and the others in the house: a button each, the picked one lit
+  function setSupport(st) {
+    var on = !!(st.support && /^https:\/\//.test(st.support));
+    $("support").classList.toggle("on", on);
+    if (on) $("supportlink").href = st.support;
+  }
+  function setHouse(st) {
+    setSupport(st);
+    $("tvname").textContent = st.tv || "";
+    document.title = (st.tv ? st.tv + " · " : "") + "fantasybug";
+    if (!st.house) return;
+    var mine = st.house.filter(function (t) { return t.here; })[0];
+    if (!cur && mine) homeId = mine.id;
+    house = st.house;
+    try { localStorage.setItem("fantasybug-house", JSON.stringify({ house: house, home: homeId })); } catch (e) {}
+    var nav = $("house"), on = cur ? cur.id : homeId;
+    nav.textContent = "";
+    if (house.length > 1) house.forEach(function (t) {
+      var b = el("button", t.id === on ? "on" : "", t.name || "TV");
+      b.type = "button";
+      b.onclick = function () { pick(t); };
+      nav.appendChild(b);
+    });
+    var add = el("button", "add", "+ Add a TV");
+    add.type = "button";
+    add.onclick = openAdd;
+    nav.appendChild(add);
+  }
+  function pick(t) {
+    cur = t.id === homeId ? null : { id: t.id, url: t.url, key: t.key };
+    try { localStorage.setItem("fantasybug-tv", JSON.stringify(cur)); } catch (e) {}
+    view = null; shownResult = false; $("result").textContent = "Waiting for your tap.";
+    refresh();
+  }
+  // adding a TV: find the others on the Wi-Fi, pick one, type the code it shows
+  var addAddr = "";
+  function addErr(m) { $("adderr").textContent = m || ""; }
+  function openAdd() {
+    $("addtv").classList.add("on"); $("codebox").hidden = true; addErr("");
+    var box = $("found"); box.textContent = "Looking for your other TVs…";
+    api("POST", "/api/find", {}).then(function (r) {
+      box.textContent = "";
+      var list = (r.tvs || []).filter(function (t) { return !house.some(function (h) { return h.id === t.id; }); });
+      if (!list.length) box.appendChild(el("p", null, "No other TVs found yet. Is fantasybug open on it, on the same Wi-Fi? Or type its address (on its fantasybug screen) below."));
+      list.forEach(function (t) {
+        var b = el("button", "pick", t.name);
+        b.appendChild(el("span", null, t.addr));
+        b.onclick = function () { ask(t.addr); };
+        box.appendChild(b);
+      });
+    }, function () { box.textContent = ""; addErr("Couldn't look for TVs. Try again."); });
+  }
+  function ask(addr) {
+    addErr(""); addAddr = addr;
+    api("POST", "/api/link", { addr: addr }).then(function (r) {
+      if (r.ok === false) return addErr(r.msg);
+      $("codebox").hidden = false; $("code").value = ""; $("code").focus();
+    }, function () { addErr("Couldn't reach this TV."); });
+  }
+  $("addgo").onclick = function () { var a = $("addr").value.trim(); if (a) ask(/:\d+$/.test(a) ? a : a + ":8780"); };
+  $("codego").onclick = function () {
+    api("POST", "/api/link", { addr: addAddr, code: $("code").value }).then(function (r) {
+      if (r.ok === false) return addErr(r.msg);
+      $("addtv").classList.remove("on"); render(r);
+    }, function () { addErr("Couldn't reach this TV."); });
+  };
+  $("addclose").onclick = function () { $("addtv").classList.remove("on"); };
+  $("rename").onclick = function () {
+    var n = prompt("What's this TV called? (Living room, Bedroom…)", $("tvname").textContent);
+    if (n != null) api("POST", "/api/name", { name: n }).then(render);
+  };
+  function setEspn(st) {
+    var box = $("espn"), e = st.espn || {};
+    box.textContent = ""; box.className = "espn";
+    if (st.can_draw === false) { box.className = "espn on bad"; box.textContent = "Open fantasybug on the TV once: it needs \"Display over other apps\"."; return; }
+    if (st.ready === false) { box.className = "espn on bad"; box.textContent = "Set up your league first: open fantasybug on the TV and scan its code."; return; }
+    if (st.view === "off") return;
+    if (e.ok === false) { box.className = "espn on bad"; box.textContent = e.msg || "Can't reach ESPN Fantasy"; return; }
+    if (!st.score) { if (e.ok === null) { box.className = "espn on"; box.textContent = "Loading your matchup…"; } return; }
+    box.className = "espn on";
+    box.appendChild(el("b", "mine", st.score.me + " " + st.score.a.toFixed(1)));
+    box.appendChild(document.createTextNode("  –  "));
+    box.appendChild(el("b", null, st.score.b.toFixed(1) + " " + st.score.them));
+  }
+  function setQuality(q) {
+    Array.prototype.forEach.call(document.querySelectorAll("#quality button"), function (b) { b.classList.toggle("on", b.dataset.q === q); });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("#quality button"), function (b) {
+    b.addEventListener("click", function () { setQuality(b.dataset.q); api("POST", "/api/quality", { q: b.dataset.q }).then(function (r) { if (r && r.quality) setQuality(r.quality); }); });
+  });
+  function render(st) {
+    if (!st) return;
+    setHouse(st);
+    if (st.quality) setQuality(st.quality);
+    setEspn(st);
+    if (st.lineup) setLineup(st.lineup);
+    if (st.view) setView(st.view);
+    document.body.classList.toggle("lookoff", st.view === "off");
+    if (st.look) setLook(st.look);
+    if (!st.games) return;
+    if ("target" in st) setButton(st.target);
+    if (st.pick && !shownResult) showPick(st.pick);
+    var g = $("games"); g.textContent = "";
+    if (!st.games.length) g.appendChild(el("div", "empty", "No live games with your players yet."));
+    st.games.forEach(function (x) {
+      var row = el("div", "item"), name = el("div", "name", x.name);
+      name.appendChild(el("span", null, x.synced ? "synced" : "default delay"));
+      row.appendChild(name);
+      var minus = el("button", "small", "−5"), plus = el("button", "small", "+5");
+      minus.onclick = function () { api("POST", "/api/nudge", { gid: x.gid, s: -5 }).then(render); };
+      plus.onclick = function () { api("POST", "/api/nudge", { gid: x.gid, s: 5 }).then(render); };
+      row.appendChild(minus);
+      row.appendChild(el("div", "d" + (x.synced ? " synced" : ""), x.delay + " s"));
+      row.appendChild(plus);
+      g.appendChild(row);
+    });
+    var r = $("recent"); r.textContent = "";
+    if (!(st.recent || []).length) r.appendChild(el("div", "empty", "None yet."));
+    (st.recent || []).forEach(function (x) {
+      var row = el("div", "item"), name = el("div", "name", x.play);
+      name.appendChild(el("span", null, x.game + " · " + ago(x.ago)));
+      row.appendChild(name);
+      r.appendChild(row);
+    });
+    $("def").textContent = "New games start at " + st.def + " s";
+  }
+  function connected(ok) {
+    var c = $("conn");
+    c.className = "conn " + (ok ? "ok" : "bad");
+    var name = cur ? ((house.filter(function (t) { return t.id === cur.id; })[0] || {}).name || "that TV") : "the TV";
+    c.textContent = ok ? "TV connected" : expired ? "Link expired: scan the TV's code again" : "Can't reach " + name;
+  }
+  function refresh() { api("GET", "/api/state").then(function (st) { connected(true); render(st); }, function () { connected(false); }); }
+
+  // after a plain tap: the plays around it in your games, newest first; more join as ESPN sends them
+  var shownResult = false;
+  function showPick(list) {
+    var box = $("result"); box.textContent = ""; box.className = "";
+    box.appendChild(el("h3", null, "Which play did you just see?"));
+    if (!list.length) box.appendChild(el("div", null, "Waiting for ESPN to send it…"));
+    list.forEach(function (p) {
+      var b = el("button", "pick", p.play);
+      b.appendChild(el("span", null, p.game));
+      b.onclick = function () { api("POST", "/api/choose", { id: p.id }).then(function (r) { showResult(r); refresh(); }); };
+      box.appendChild(b);
+    });
+    var cancel = el("button", "small", "None of these");
+    cancel.style.marginTop = "0.625rem";
+    cancel.onclick = function () { shownResult = true; box.textContent = "Cancelled. Tap again when the next play happens."; };
+    box.appendChild(cancel);
+  }
+  function showResult(res) {
+    if (res.pick) { shownResult = false; refresh(); return; }
+    shownResult = true;
+    var box = $("result"); box.textContent = ""; box.className = res.ok ? "" : "bad";
+    if (!res.ok) { box.textContent = res.msg || "Couldn't reach the TV. Is the overlay on?"; return; }
+    var row = el("div", "row"), t = el("div");
+    t.appendChild(el("b", null, res.game + ": " + res.before + " s → " + res.after + " s"));
+    t.appendChild(document.createElement("br"));
+    t.appendChild(document.createTextNode("Synced to " + res.play + (res.before === res.after ? "" : res.after < res.before ? " (popups were late)" : " (popups were early)")));
+    row.appendChild(t);
+    var undo = el("button", "small", "Undo");
+    undo.onclick = function () { api("POST", "/api/undo").then(function (st) { render(st); box.className = ""; box.textContent = "Undone."; }); };
+    row.appendChild(undo);
+    box.appendChild(row);
+  }
+
+  // on touch-down, not on release: the tap's moment is when it reaches the TV, so send it straight away
+  var busy = false, lastTap = 0;
+  function tap(ev, any) {
+    ev.preventDefault();
+    if (busy || Date.now() - lastTap < 1500) return;   // a touch also sends a click: one tap, once
+    busy = true;
+    lastTap = Date.now();
+    $("tap").classList.add("hit");
+    if (navigator.vibrate) navigator.vibrate(30);
+    shownResult = false;
+    api("POST", "/api/tap", target && !any ? { id: target.id } : null).then(showResult, function () { showResult({ ok: false }); })
+      .then(function () { busy = false; $("tap").classList.remove("hit"); refresh(); });
+  }
+  $("tap").addEventListener("pointerdown", function (ev) { tap(ev, false); });
+  $("tap").addEventListener("click", function (ev) { tap(ev, false); });
+  $("other").addEventListener("click", function (ev) { tap(ev, true); });
+  $("reset").onclick = function () {
+    if (confirm("Put every game back to the default delay?")) api("POST", "/api/reset").then(render);
+  };
+  setButton(null);
+  if (!KEY && !demo) { connected(false); $("conn").textContent = "Scan the phone remote's code on the TV"; return; }
+  try { var kept = JSON.parse(localStorage.getItem("fantasybug-house") || "null"); if (kept && kept.house) { homeId = kept.home; setHouse({ house: kept.house }); } } catch (e) {}
+  refresh();
+  setInterval(function () { if (!document.hidden) refresh(); }, 2000);
+})();
+</script>
+</body>
+</html>

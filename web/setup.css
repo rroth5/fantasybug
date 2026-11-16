@@ -1,0 +1,56 @@
+@font-face { font-family: "Inter"; src: url(fonts/inter-latin-wght-normal.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+:root {
+  --bg: #0c0c10; --card: #17171d; --line: #2a2a33; --text: #f2f2f5; --muted: #a0a0aa;
+  --mine: #30d158; --theirs: #ff453a; --focus: #64d2ff;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.45 Inter, system-ui, -apple-system, sans-serif; }
+main { max-width: 34rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+h1 { margin: 0; font-size: 1.75rem; letter-spacing: -0.02em; }
+.logo { width: 1.75rem; height: 1.75rem; border-radius: 0.375rem; vertical-align: -0.3rem; margin-right: 0.5rem; }
+.lede { margin: 0.25rem 0 0; color: var(--muted); }
+.status { margin: 1rem 0 0; padding: 0.75rem 1rem; border-radius: 0.75rem; background: var(--card); }
+.status.ok { box-shadow: inset 0.25rem 0 0 var(--mine); }
+section { margin-top: 1.5rem; padding: 1.25rem 1rem; border-radius: 1rem; background: var(--card); }
+h2 { margin: 0 0 0.75rem; font-size: 1.125rem; display: flex; align-items: center; gap: 0.5rem; }
+.n { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--mine); color: #08130b; font-size: 0.875rem; font-weight: 800; }
+label { display: block; margin-bottom: 1rem; font-weight: 600; }
+input:not([type]), textarea { display: block; width: 100%; margin-top: 0.35rem; padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: 0.6rem;
+  background: #0f0f14; color: var(--text); font: 15px/1.4 ui-monospace, Menlo, monospace; }
+textarea { resize: vertical; word-break: break-all; }
+input:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+small { display: block; margin-top: 0.35rem; color: var(--muted); font-weight: 400; font-size: 0.85rem; }
+code { font-size: 0.85em; }
+details { margin: 0 0 1rem; padding: 0.75rem 1rem; border-radius: 0.6rem; background: #101016; }
+summary { cursor: pointer; font-weight: 600; color: var(--focus); }
+details ol { padding-left: 1.25rem; }
+details li { margin: 0.35rem 0; }
+.warn { color: #ffd60a; }
+button { font: inherit; cursor: pointer; }
+#connect { width: 100%; padding: 0.85rem; border: 0; border-radius: 0.7rem; background: var(--mine); color: #08130b; font-weight: 700; }
+#connect:disabled { opacity: 0.6; }
+.err { margin: 0.75rem 0 0; color: var(--theirs); }
+.muted { color: var(--muted); }
+.teams { display: grid; gap: 0.5rem; }
+.team { display: block; width: 100%; padding: 0.75rem 1rem; text-align: left; border: 1px solid var(--line); border-radius: 0.7rem; background: #101016; color: var(--text); }
+.team small { margin: 0.1rem 0 0; }
+.team.on { border-color: var(--mine); box-shadow: inset 0.25rem 0 0 var(--mine); }
+.team.on b::after { content: "  ✓"; color: var(--mine); }
+.field { margin-bottom: 1.25rem; }
+.field > span { font-weight: 600; }
+.stepper { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem; }
+.stepper button { min-width: 3rem; padding: 0.6rem 0.5rem; border: 1px solid var(--line); border-radius: 0.6rem; background: #101016; color: var(--text); }
+.stepper output { flex: 1; text-align: center; font-size: 1.375rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.checks { display: grid; gap: 0.25rem; margin-top: 0.5rem; }
+.checks label { margin: 0; padding: 0.4rem 0; font-weight: 500; }
+.checks input { width: 1.15rem; height: 1.15rem; vertical-align: -0.2rem; accent-color: var(--mine); }
+.saved { margin: 0; color: var(--mine); }
+footer { margin-top: 2rem; text-align: center; }
+.link { border: 0; background: none; color: var(--theirs); text-decoration: underline; padding: 0.5rem; }
+
+.status.bad { box-shadow: inset 0.25rem 0 0 var(--theirs); }
+.secret { -webkit-text-security: disc; }
+.switch { display: flex; align-items: center; gap: 0.6rem; font-weight: 600; }
+.switch input { width: 1.15rem; height: 1.15rem; accent-color: var(--mine); }
+.remote-link { display: block; margin-top: 0.75rem; padding: 0.85rem; border-radius: 0.7rem; background: var(--mine); color: #08130b; font-weight: 700; text-align: center; text-decoration: none; }

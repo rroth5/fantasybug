@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Plain http is allowed for one thing: TVs in the house talking to each other's phone remote (House.kt), on the
+     home network, where TVs have no https. House.post only ever calls home network addresses; everything that goes
+     out of the house (ESPN) is https. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

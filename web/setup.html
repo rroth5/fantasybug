@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>fantasybug setup</title>
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="stylesheet" href="setup.css">
+</head>
+<body>
+<!-- The phone setup page. The TV serves it (SetupServer.kt) while fantasybug's screen is open, and the
+     QR code on the TV carries its address and key. Drawn by setup.js. -->
+<main>
+  <header>
+    <h1><img class="logo" src="icon.svg" alt="">fantasybug</h1>
+    <p class="lede">Your ESPN Fantasy matchup, over whatever is on the TV.</p>
+    <p class="status" id="status"></p>
+  </header>
+
+  <section id="s-login">
+    <h2><span class="n">1</span> Your ESPN league</h2>
+    <form id="login" autocomplete="off">
+      <label>League ID
+        <input id="league" inputmode="numeric" autocomplete="off" autocorrect="off" placeholder="for example 12345678" required>
+        <small>The number after <code>leagueId=</code> in your league's web address. Pasting the whole address works too.</small>
+      </label>
+      <label>espn_s2
+        <textarea id="s2" class="secret" rows="3" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" placeholder="a long code starting AEB…"></textarea>
+      </label>
+      <label>SWID
+        <input id="swid" class="secret" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" placeholder="{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}">
+        <small>A public league needs neither. A private one needs both.</small>
+      </label>
+      <label class="switch"><input type="checkbox" id="reveal"> Show what I pasted</label>
+      <details>
+        <summary>How do I find espn_s2 and SWID?</summary>
+        <ol>
+          <li>On a computer, open <b>fantasy.espn.com</b> in Chrome and sign in.</li>
+          <li>Press <b>F12</b> (Windows) or <b>Cmd + Option + I</b> (Mac).</li>
+          <li>Click <b>Application</b> at the top (behind <b>»</b> if you can't see it), then <b>Cookies</b>, then <b>https://fantasy.espn.com</b>.</li>
+          <li>Type <b>espn</b> in the filter box. Copy the value next to <b>espn_s2</b>.</li>
+          <li>Type <b>SWID</b> in the filter box. Copy its value, curly brackets and all.</li>
+        </ol>
+        <p>Send them to your phone the way you like (a note to yourself works), or open this page on the computer instead: the TV's address is under the QR code.</p>
+        <p class="warn">These two codes act like your ESPN password. They stay on your TV and only ever go to ESPN. Don't post them anywhere.</p>
+      </details>
+      <button type="submit" id="connect">Connect</button>
+      <p class="err" id="login-err" hidden></p>
+    </form>
+  </section>
+
+  <section id="s-team" hidden>
+    <h2><span class="n">2</span> Which team is yours?</h2>
+    <p class="muted" id="league-name"></p>
+    <div class="teams" id="teams"></div>
+  </section>
+
+  <section id="s-settings" hidden>
+    <h2><span class="n">3</span> Settings</h2>
+    <div class="field">
+      <span>Broadcast delay</span>
+      <div class="stepper">
+        <button type="button" data-step="-5">−5</button>
+        <button type="button" data-step="-1">−1</button>
+        <output id="delay">58 s</output>
+        <button type="button" data-step="1">+1</button>
+        <button type="button" data-step="5">+5</button>
+      </div>
+      <small>How far your TV picture runs behind the real game. A popup waits this long after ESPN logs a play, so it lands when you see it. Streaming services are often about a minute behind. If popups come too early, add seconds; too late, take some off.</small>
+    </div>
+    <div class="field">
+      <span>Popups to show</span>
+      <div class="checks" id="popups"></div>
+      <small>The score always keeps up; this only picks which cards pop up.</small>
+    </div>
+    <div class="field">
+      <span>Next: your phone remote</span>
+      <small>This is how you run fantasybug during the game: the views, the look (notch or pill), your lineup, picture quality, and tap-to-sync for the timing. Open it, then add it to your home screen.</small>
+      <a class="remote-link" id="remote-link" hidden>Open the phone remote</a>
+    </div>
+    <p class="saved" id="saved" hidden>Saved. The TV has it.</p>
+  </section>
+
+  <footer>
+    <button type="button" class="link" id="forget" hidden>Forget my ESPN login on this TV</button>
+    <p class="muted">Your league ID, espn_s2 and SWID go to your TV and from there only to ESPN. They are never sent to fantasybug's makers or anyone else.</p>
+    <p class="muted">fantasybug is not affiliated with ESPN or the NFL.</p>
+  </footer>
+</main>
+<script src="setup.js"></script>
+</body>
+</html>

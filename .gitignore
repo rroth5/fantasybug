@@ -1,0 +1,24 @@
+# Secrets: never commit these
+config.json
+*.env
+.env*
+keystore.properties
+*.jks
+*.keystore
+espn*.json
+cookies.txt
+cookies.json
+.fantasybug-denylist
+
+# Build output
+build/
+.gradle/
+local.properties
+dist/
+*.apk
+*.aab
+.idea/
+*.iml
+.DS_Store
+__pycache__/
+.claude/

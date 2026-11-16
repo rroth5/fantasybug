@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+<title>fantasybug</title>
+<link rel="preload" href="fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+<!-- fantasybug, drawn over whatever is playing: a slim score strip, and a card that flashes
+     when a player in the matchup scores. Transparent everywhere else. Drawn by overlay.js. -->
+<div class="ov loading" id="ov">
+  <div class="strip" id="strip"></div>
+  <div class="flashes" id="flashes"></div>
+</div>
+<script src="config.js"></script>
+<script src="overlay.js"></script>
+<script src="overlay-live.js"></script>
+</body>
+</html>

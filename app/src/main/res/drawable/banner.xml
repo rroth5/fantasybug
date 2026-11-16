@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The TV app row's banner (320x180): a scorebug over a field -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp" android:height="180dp" android:viewportWidth="320" android:viewportHeight="180">
+    <path android:fillColor="#2E6A33" android:pathData="M0,0h320v180h-320z" />
+    <path android:fillColor="#3C8A3F" android:pathData="M0,60h320v60h-320z" />
+    <path android:fillColor="#59FFFFFF" android:pathData="M78,0h3v180h-3zM158,0h3v180h-3zM238,0h3v180h-3z" />
+    <path android:fillColor="#E60C0C10" android:pathData="M70,62h180a14,14 0,0 1,14 14v28a14,14 0,0 1,-14 14h-180a14,14 0,0 1,-14 -14v-28a14,14 0,0 1,14 -14z" />
+    <path android:fillColor="#30D158" android:pathData="M74,78h64v24h-64z" />
+    <path android:fillColor="#FF453A" android:pathData="M182,78h64v24h-64z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M154,84h12v12h-12z" />
+</vector>
