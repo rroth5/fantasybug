@@ -120,25 +120,6 @@ Press **Off** on the phone remote (or **Stop the sample game** on the TV) to mak
   the scorebug, and hides while the box score or league is open.
 - **Name this TV** (at the bottom), so you can tell your TVs apart.
 
-### More than one TV: one phone app for all of them
-
-Install fantasybug on each TV and set it up (each TV signs in to your league on its own). Then link them,
-once, from the phone remote:
-
-1. Tap **+ Add a TV** at the top. Your other fantasybug TVs on the Wi-Fi show up by name. (Not there? Open
-   fantasybug once on that TV. Or type its address: the fantasybug screen on that TV shows it.)
-2. Tap the TV. It shows a **4-digit code** on its screen for two minutes. Type it on your phone and tap
-   **Link**. The code proves you're in the room: nobody else on your Wi-Fi can link to your TVs without it.
-3. Done. The buttons at the top switch between your TVs, and everything on the page runs the one you picked.
-   Link a third TV the same way: every TV learns about all the others.
-
-Only the phone remote links are shared between your TVs, never your ESPN login.
-
-**Your TVs don't all need to be on.** The page comes from the TV whose icon you tapped, so *that* TV has to be
-on (a sleeping Fire TV leaves the Wi-Fi). If the TV you picked last is asleep, the page switches to the TV that's
-on by itself, within a few seconds. Tip: add the phone remote to your home screen from each TV (scan each
-one's code); then whichever TV you're in front of, its icon opens.
-
 The look, lineup and quality are kept on the TV. They can only be changed while your matchup is showing.
 
 ## 7. Get the timing right
@@ -170,6 +151,25 @@ broadcast delay. Synced delays last for the day. **Recent popups** lists what wa
 
 Change it on the fantasybug screen (highlight **Broadcast delay** and press left or right) or on the phone
 setup page. If you switch between YouTube TV and a cable app, you may need to adjust.
+
+## More than one TV (optional)
+
+fantasybug is made for the TV you watch the game on, and one TV is the simplest setup. If you want it on
+another TV too:
+
+1. **Install and set it up on each TV**, the same way (each TV signs in to your league on its own).
+2. **Keep one phone remote icon per TV.** Scan each TV's code and add each to your home screen, and name the
+   TVs (**Name this TV**) so the icons say which is which. The phone remote page comes from its own TV, so the
+   icon of the TV you're watching always opens. (A sleeping Fire TV leaves the Wi-Fi, so its icon won't open
+   until it wakes.)
+3. **Linking them is optional.** On a phone remote, tap **+ Add a TV**: your other fantasybug TVs on the Wi-Fi
+   show up by name (not there? open fantasybug once on that TV, or type the address its fantasybug screen
+   shows). Tap one; it shows a **4-digit code** on its screen for two minutes; type it and tap **Link**. The
+   code proves you're in the room. Then buttons at the top switch between your TVs from either icon. If the TV
+   you picked is asleep, the page goes back to the one that's on, by itself, within a few seconds.
+
+Only the phone remote links are shared between linked TVs, never your ESPN login. **+ Add a TV** also lists
+your other TVs, each with **Remove**.
 
 ## Streaming sticks and Fire TV
 
@@ -208,7 +208,7 @@ You can switch Developer options off again afterwards.
 
 | Problem | Fix |
 |---|---|
-| The same TV shows twice in the phone's TV switcher (after reinstalling it) | It tidies itself the next time the TVs talk (fantasybug 0.1.3 and newer). Or tap **+ Add a TV**: the panel lists your other TVs with **Remove**. |
+| The same TV shows twice in the phone's TV switcher (after reinstalling it, linked TVs) | It tidies itself the next time the TVs talk (fantasybug 0.1.3 and newer). Or tap **+ Add a TV**: the panel lists your other TVs with **Remove**. |
 | The look, lineup and quality buttons are greyed out | They only work while your matchup is showing: press **Scorebug** first. |
 | A Fire TV stick gets slow | Pick **Low** image quality and the **pill** look, and see [Streaming sticks and Fire TV](#streaming-sticks-and-fire-tv). |
 | The phone remote says it can't reach the TV | The TV must be on and on the same Wi-Fi. If the TV restarted, open fantasybug on it once. If the TV's address changed, scan the phone remote's QR code again. |
