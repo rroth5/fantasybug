@@ -123,7 +123,7 @@ Scan it. Your phone gets:
 - **Sync the popups:** tap the big button the moment the play it names happens on your TV, or tap when any
   play happens and pick it from a list. Each game has its own delay, with −5/+5, Undo and Reset.
 - **All your TVs in one place:** link your other fantasybug TVs with **+ Add a TV** (a code on the TV's screen
-  proves you're in the room) and switch between them at the top.
+  proves you're in the room) and switch between them at the top. Only the TV whose icon you tapped needs to be on.
 
 Add it to your home screen and it's one tap away. The [user guide](docs/USER-GUIDE.md#4-turn-on-the-phone-remote) has
 the details.

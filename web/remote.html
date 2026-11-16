@@ -233,8 +233,10 @@
     }
     // the TV's own server, with this phone remote's key (from the QR code, kept in this page's address)
     // the TV picked in the switcher: its own address and key (this page's own TV when none is picked)
+    var ctl = window.AbortController ? new AbortController() : null;
+    if (ctl) setTimeout(function () { ctl.abort(); }, 5000);
     return fetch((cur ? cur.url : "") + path.slice(1), { method: method, cache: "no-store", headers: { "X-Key": cur ? cur.key : KEY, "Content-Type": "application/json" },
-        body: method === "POST" ? JSON.stringify(body || {}) : undefined })
+        body: method === "POST" ? JSON.stringify(body || {}) : undefined, signal: ctl ? ctl.signal : undefined })
       .then(function (r) {
         return r.json().catch(function () { return {}; }).then(function (d) {
           if (r.status === 403) { expired = true; throw new Error(d.error); }
@@ -368,6 +370,7 @@
     nav.appendChild(add);
   }
   function pick(t) {
+    fellBack = "";
     cur = t.id === homeId ? null : { id: t.id, url: t.url, key: t.key };
     try { localStorage.setItem("fantasybug-tv", JSON.stringify(cur)); } catch (e) {}
     view = null; shownResult = false; $("result").textContent = "Waiting for your tap.";
@@ -488,9 +491,26 @@
     var c = $("conn");
     c.className = "conn " + (ok ? "ok" : "bad");
     var name = cur ? ((house.filter(function (t) { return t.id === cur.id; })[0] || {}).name || "that TV") : "the TV";
+    if (ok && noteMsg && Date.now() < noteUntil) { c.className = "conn bad"; c.textContent = noteMsg; return; }
     c.textContent = ok ? "TV connected" : expired ? "Link expired: scan the TV's code again" : "Can't reach " + name;
   }
-  function refresh() { api("GET", "/api/state").then(function (st) { connected(true); render(st); }, function () { connected(false); }); }
+  var asking = false, fellBack = "";
+  function refresh() {
+    if (asking) return;   // one question at a time: a TV that's slow to answer doesn't pile them up
+    asking = true;
+    api("GET", "/api/state").then(function (st) { asking = false; connected(true); render(st); if (fellBack) note(fellBack + " is asleep: showing " + (st.tv || "this TV")); }, function () {
+      asking = false;
+      if (cur && !expired) {   // the picked TV is off or asleep: back to this page's own TV, which is on (it served this page)
+        fellBack = (house.filter(function (t) { return t.id === cur.id; })[0] || {}).name || "That TV";
+        cur = null;
+        try { localStorage.setItem("fantasybug-tv", "null"); } catch (e) {}
+        return refresh();
+      }
+      connected(false);
+    });
+  }
+  var noteMsg = "", noteUntil = 0;   // shown in the connection line for a while: why this is the other TV
+  function note(m) { noteMsg = m; noteUntil = Date.now() + 15000; fellBack = ""; connected(true); }
 
   // after a plain tap: the plays around it in your games, newest first; more join as ESPN sends them
   var shownResult = false;

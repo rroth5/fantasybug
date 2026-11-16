@@ -132,8 +132,12 @@ once, from the phone remote:
 3. Done. The buttons at the top switch between your TVs, and everything on the page runs the one you picked.
    Link a third TV the same way: every TV learns about all the others.
 
-Only the phone remote links are shared between your TVs, never your ESPN login. Either TV's icon on your
-phone works. If the TV whose icon you use is switched off, open the other one's.
+Only the phone remote links are shared between your TVs, never your ESPN login.
+
+**Your TVs don't all need to be on.** The page comes from the TV whose icon you tapped, so *that* TV has to be
+on (a sleeping Fire TV leaves the Wi-Fi). If the TV you picked last is asleep, the page switches to the TV that's
+on by itself, within a few seconds. Tip: add the phone remote to your home screen from each TV (scan each
+one's code); then whichever TV you're in front of, its icon opens.
 
 The look, lineup and quality are kept on the TV. They can only be changed while your matchup is showing.
 
