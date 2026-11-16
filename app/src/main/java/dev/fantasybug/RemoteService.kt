@@ -55,7 +55,10 @@ class RemoteService : Service() {
         server = MiniServer(ctx, 8780..8789, { Prefs.remoteKey(ctx) }, "remote.html",
             { it.startsWith("remote") || it.startsWith("icon") }, { m, p, b, t -> api(ctx, m, p, b, t) },
             open = { it == "/api/pair/ask" || it == "/api/pair/finish" }, cors = true).also {
-            if (it.start()) House.announce(ctx, it.port)   // so the other TVs in the house can find this one
+            if (it.start()) {
+                House.announce(ctx, it.port)   // so the other TVs in the house can find this one
+                Thread { Thread.sleep(3000); House.tidy(ctx) }.start()   // and stale entries (a TV reinstalled) go from its list, once it knows its own address
+            }
             running = it
         }
     }
@@ -129,7 +132,7 @@ class RemoteService : Service() {
                 state(ctx).put("ok", true)
             }
             "/api/unlink" -> { House.unlink(ctx, b.optString("id")); state(ctx) }
-            "/api/house" -> { House.merge(ctx, b.optJSONArray("house")); JSONObject().put("ok", true) }   // from another TV in the house
+            "/api/house" -> { House.merge(ctx, b.optJSONArray("house")); Thread { House.tidy(ctx) }.start(); JSONObject().put("ok", true) }   // from another TV in the house
             "/api/house/leave" -> { House.forget(ctx, b.optString("id")); JSONObject().put("ok", true) }
             // pairing, from another TV (no key: these only show a code, or check one)
             "/api/pair/ask" -> { House.ask(ctx, b.optString("from", "another TV")); JSONObject().put("ok", true) }

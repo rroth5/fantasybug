@@ -94,15 +94,51 @@ object House {
     }
 
     /** This TV leaves the house (or forgets one TV): the others are told, best effort. */
+    /** A TV is taken out of the house (the phone's Remove): every TV forgets it, and it forgets them, best effort. */
     fun unlink(c: Context, id: String) {
         val o = others(c)
         val keep = JSONArray()
         var gone: JSONObject? = null
         for (i in 0 until o.length()) o.optJSONObject(i)?.let { if (it.optString("id") == id) gone = it else keep.put(it) }
         store(c).edit().putString("house", keep.toString()).commit()
-        val g = gone ?: return
-        Thread { post(g.optString("url") + "api/house/leave", JSONObject().put("id", id(c)), g.optString("key")) }.start()
+        val me = id(c)
+        Thread {
+            gone?.let { g -> post(g.optString("url") + "api/house/leave", JSONObject().put("id", me), g.optString("key")) }
+            for (i in 0 until keep.length()) keep.optJSONObject(i)?.let { t ->   // and the rest of the house forgets it too
+                post(t.optString("url") + "api/house/leave", JSONObject().put("id", id), t.optString("key"))
+            }
+        }.start()
     }
+
+    /**
+     * Tidies the list: a TV reinstalled gets a new id and key at the same address, so two entries share one
+     * address. The TV there answers only its current key: the entry it refuses is the stale one, and goes. An
+     * address that doesn't answer at all (the TV is off) is left alone. Runs off the main thread.
+     */
+    fun tidy(c: Context) {
+        val o = others(c)
+        val selfUrl = self(c)?.optString("url")
+        val byUrl = LinkedHashMap<String, MutableList<JSONObject>>()
+        for (i in 0 until o.length()) o.optJSONObject(i)?.let { byUrl.getOrPut(it.optString("url")) { mutableListOf() }.add(it) }
+        val stale = HashSet<String>()
+        for ((url, list) in byUrl) {
+            if (url == selfUrl) { list.forEach { stale.add(it.optString("id")) }; continue }   // this TV's own address: an old copy of itself
+            if (list.size < 2) continue
+            val alive = list.filter { t -> get(url + "api/state", t.optString("key")) == 200 }
+            if (alive.isNotEmpty()) list.filter { it !in alive }.forEach { stale.add(it.optString("id")) }
+        }
+        stale.forEach { forget(c, it) }
+    }
+
+    private fun get(url: String, key: String): Int = try {
+        val conn = URL(url).openConnection() as HttpURLConnection
+        conn.connectTimeout = 3000
+        conn.readTimeout = 6000
+        conn.setRequestProperty("X-Key", key)
+        val code = conn.responseCode
+        conn.disconnect()
+        code
+    } catch (e: Exception) { 0 }
 
     /** Another TV left: forget it here. */
     fun forget(c: Context, id: String) {
@@ -149,6 +185,7 @@ object House {
         hideCode()
         val mine = all(c)   // before taking theirs in, so they get this TV and the ones it knew
         merge(c, house)
+        Thread { tidy(c) }.start()   // a TV linking again after a reinstall: its old entry goes
         share(c)            // the TVs this one already knew learn about the new ones
         return mine
     }
@@ -199,6 +236,7 @@ object House {
             ?: throw Exception("Can't reach that TV.")
         if (r.has("error")) throw Exception(r.optString("error"))
         merge(c, r.optJSONArray("house"))
+        tidy(c)
         share(c)
     }
 

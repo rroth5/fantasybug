@@ -204,6 +204,7 @@ You can switch Developer options off again afterwards.
 
 | Problem | Fix |
 |---|---|
+| The same TV shows twice in the phone's TV switcher (after reinstalling it) | It tidies itself the next time the TVs talk (fantasybug 0.1.3 and newer). Or tap **+ Add a TV**: the panel lists your other TVs with **Remove**. |
 | The look, lineup and quality buttons are greyed out | They only work while your matchup is showing: press **Scorebug** first. |
 | A Fire TV stick gets slow | Pick **Low** image quality and the **pill** look, and see [Streaming sticks and Fire TV](#streaming-sticks-and-fire-tv). |
 | The phone remote says it can't reach the TV | The TV must be on and on the same Wi-Fi. If the TV restarted, open fantasybug on it once. If the TV's address changed, scan the phone remote's QR code again. |

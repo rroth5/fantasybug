@@ -121,6 +121,7 @@
   <div class="top"><h1><img class="logo" src="icon.svg" alt="">fantasybug<small id="tvname"></small></h1><span class="conn" id="conn">Connecting…</span></div>
   <nav class="house" id="house" aria-label="Your TVs"></nav>
   <div class="panel" id="addtv">
+    <div id="yours"></div>
     <h3>Add a TV</h3>
     <p>Open fantasybug once on the other TV, on the same Wi-Fi. Then pick it here.</p>
     <div id="found"></div>
@@ -222,6 +223,7 @@
       if (path === "/api/name") { fake.tv = body.name; fake.house[0].name = body.name; }
       if (path === "/api/find") return Promise.resolve({ tvs: [{ id: "b2", name: "Bedroom", addr: "192.168.x.x:8780" }] });
       if (path === "/api/link" && !body.code) return Promise.resolve({ ok: true });
+      if (path === "/api/unlink") fake.house = fake.house.filter(function (t) { return t.id !== body.id; });
       if (path === "/api/link" && !fake.house.some(function (t) { return t.id === "b2"; })) fake.house.push({ id: "b2", name: "Bedroom", url: "#", key: "demo", here: false });
       if (path === "/api/quality") { fake.quality = body.q; return Promise.resolve({ ok: true, quality: body.q }); }
       if (path === "/api/lineup") { Object.assign(fake.lineup, body); return Promise.resolve(JSON.parse(JSON.stringify(fake.lineup))); }
@@ -374,8 +376,27 @@
   // adding a TV: find the others on the Wi-Fi, pick one, type the code it shows
   var addAddr = "";
   function addErr(m) { $("adderr").textContent = m || ""; }
+  function drawYours() {   // the other TVs linked here, each with Remove (a TV given away, or an old copy after a reinstall)
+    var box = $("yours"), others = house.filter(function (t) { return !t.here; });
+    box.textContent = "";
+    if (!others.length) return;
+    box.appendChild(el("h3", null, "Your other TVs"));
+    others.forEach(function (t) {
+      var row = el("div", "row"), name = el("div", null, t.name || "TV");
+      name.style.flex = "1";
+      row.appendChild(name);
+      var rm = el("button", "small", "Remove");
+      rm.onclick = function () {
+        if (!confirm("Remove " + (t.name || "this TV") + " from your TVs? Its own fantasybug keeps working; you can link it again later.")) return;
+        if (cur && cur.id === t.id) pick({ id: homeId });
+        api("POST", "/api/unlink", { id: t.id }).then(function (r) { render(r); drawYours(); }, function () { addErr("Couldn't reach this TV."); });
+      };
+      row.appendChild(rm);
+      box.appendChild(row);
+    });
+  }
   function openAdd() {
-    $("addtv").classList.add("on"); $("codebox").hidden = true; addErr("");
+    $("addtv").classList.add("on"); $("codebox").hidden = true; addErr(""); drawYours();
     var box = $("found"); box.textContent = "Looking for your other TVs…";
     api("POST", "/api/find", {}).then(function (r) {
       box.textContent = "";
