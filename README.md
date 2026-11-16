@@ -7,8 +7,7 @@ anything else, it shows your score and theirs, as a notch hanging from the top o
 one of the players in your matchup scores, a card pops up with what they did, timed to land when your
 stream shows the play, not a minute early. A page on your phone runs it all.
 
-<!-- VIDEO: the preview video goes here (uploaded on github.com, which gives it a link that plays on this page) -->
-<a href="docs/media/fantasybug-preview.mp4"><img src="docs/media/preview.jpg" width="300" alt="Watch the 22 second preview"></a>
+<a href="docs/media/fantasybug-preview.mp4"><img src="docs/media/preview.gif" width="270" alt="fantasybug in 22 seconds (tap for the video with sound)"></a>
 
 **New here? The [user guide](docs/USER-GUIDE.md) walks you through it in about 15 minutes.**
 
