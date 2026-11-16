@@ -7,11 +7,8 @@ anything else, it shows your score and theirs, as a notch hanging from the top o
 one of the players in your matchup scores, a card pops up with what they did, timed to land when your
 stream shows the play, not a minute early. A page on your phone runs it all.
 
+<!-- VIDEO: the preview video goes here (uploaded on github.com, which gives it a link that plays on this page) -->
 <a href="docs/media/fantasybug-preview.mp4"><img src="docs/media/preview.jpg" width="300" alt="Watch the 22 second preview"></a>
-
-<!-- For a player that plays right on this page: on github.com, edit this file, drag
-     docs/media/fantasybug-preview.mp4 into the editor, and put the link GitHub makes here in place of
-     the picture above. -->
 
 **New here? The [user guide](docs/USER-GUIDE.md) walks you through it in about 15 minutes.**
 
@@ -20,11 +17,9 @@ stream shows the play, not a minute early. A page on your phone runs it all.
 > the same data your browser does when you open ESPN Fantasy, with your own login, and may stop working
 > if ESPN changes how its site works.
 
-| The notch and a popup | The pill and a popup | Your lineup beside the game |
-|---|---|---|
-| ![Notch](docs/screenshots/notch.png) | ![Pill](docs/screenshots/scorebug.png) | ![Lineup](docs/screenshots/lineup.png) |
-| **Box score** | **League** | **Phone remote** |
-| ![Box score](docs/screenshots/boxscore.png) | ![League](docs/screenshots/league.png) | <img src="docs/screenshots/phone-remote.png" width="200" alt="Phone remote"> |
+| Over the game | Box score | Phone remote |
+|:-:|:-:|:-:|
+| <img src="docs/screenshots/notch.png" width="280" alt="The notch and a scoring popup"> | <img src="docs/screenshots/boxscore.png" width="280" alt="The box score"> | <img src="docs/screenshots/phone-remote.png" width="130" alt="The phone remote"> |
 
 *(The pictures use a made-up league. The green field stands in for the game you are watching.)*
 
